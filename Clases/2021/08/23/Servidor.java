@@ -5,9 +5,6 @@ import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-
-import javax.sound.midi.SysexMessage;
-
 public class Servidor{
 
     static void read(DataInputStream f,byte[] b,int posicion,int longitud) throws Exception{
