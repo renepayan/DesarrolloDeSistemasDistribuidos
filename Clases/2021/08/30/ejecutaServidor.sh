@@ -1,2 +1,2 @@
 #!/bin/bash
-java -Djavax.net.keyStore=keystore_servidor.jdk -Djavax.net.ssl.keyStorePassword=1234567 ServidorSSL
+java -Djavax.net.keyStore=keystore_servidor.jks -Djavax.net.ssl.keyStorePassword=1234567 ServidorSSL
