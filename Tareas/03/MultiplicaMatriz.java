@@ -13,8 +13,6 @@ public class MultiplicaMatriz {
     static long B[][];
     static long BOrig[][];
     static long C[][];
-    static boolean estaLlenoC = false;
-    static int matricesRecibidas = -1;
     static Object bloqueo = new Object();
     static void recibeMatriz(long[][] matriz, DataInputStream entrada, int filaInicio, int columnaInicio, int filaFin, int ColumnaFin) throws Exception{
         int longitud = (filaFin-filaInicio)*(ColumnaFin-columnaInicio)*8;
@@ -153,7 +151,6 @@ public class MultiplicaMatriz {
                 workers[i].start();
             }
             while( N <= LIMITE ){
-                System.out.println(N);
                 //Creo las matrices iniciales
                 A = new long[N][N];
                 B = new long[N][N];
@@ -220,7 +217,6 @@ public class MultiplicaMatriz {
                     conexion = new Socket(ipServidor, 20000);
                     break;
                 }catch(Exception e){
-                    e.printStackTrace();
                 }
             } 
             //Ahora creo los streams de entrada y salida
