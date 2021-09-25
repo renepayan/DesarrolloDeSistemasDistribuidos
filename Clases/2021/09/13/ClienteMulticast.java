@@ -16,7 +16,8 @@ public class ClienteMulticast {
     public static void main(String[] args){
         MulticastSocket socket = new MulticastSocket(50000);
         InetSocketAddress grupo = new InetSocketAddress(InetAddress.getByName("230.0.0.0"),50000);
-        NetworkInterface netInter = new NetworkInterface.getByName("en0");
+        NetworkInterface netInter = NetworkInterface.getByName("en0");
+
         socket.joinGroup(grupo, netInter);
         byte[] a  = recibe_mensaje(socket, 4);
         System.out.print(new String(a,"UTF-8"));
