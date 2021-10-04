@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.lang.Thread;
 
-public class ServidorMultithread {
+public class ServidorMultithreadLamport {
     static String[] hosts;
     static int[] puertos;
     static int num_nodos;
