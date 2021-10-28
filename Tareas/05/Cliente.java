@@ -2,7 +2,7 @@ import java.rmi.Naming;
 
 public class Cliente {
     static int N;
-    static final int LIMITE = 9;
+    static final int LIMITE = 3000;
     static final int num_nodos = 3;
     static double[][] separa_matriz(double[][] A, int renglon_inicial){
         double[][] M = new double[N/3][N];
@@ -50,6 +50,7 @@ public class Cliente {
             try{
                 return this.interfaz.multiplica_matrices(matriz1, matriz2, N);
             }catch(Exception e){
+		e.printStackTrace();
                 return null;   
             }
         }
@@ -95,6 +96,7 @@ public class Cliente {
             recursos[i].encontrarRecursos();
         }
         for(N = 3; N <= LIMITE; N+=3){
+	    System.out.println(N);
             double[][] A = new double[N][N];
             double[][] B = new double[N][N];
             double[][] C = new double[N][N];
