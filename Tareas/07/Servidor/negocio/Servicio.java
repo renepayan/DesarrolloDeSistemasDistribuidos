@@ -110,11 +110,11 @@ public class Servicio
 
       if (usuario.foto != null)
       {
-        PreparedStatement stmt_3 = conexion.prepareStatement("INSERT INTO fotos_usuarios VALUES (0,?,(SELECT id_usuario FROM usuarios WHERE email=?))");
+        PreparedStatement stmt_3 = conexion.prepareStatement("INSERT INTO fotos_usuarios VALUES (0,?,?)");
         try
         {
           stmt_3.setBytes(1,usuario.foto);
-          stmt_3.setString(2,usuario.email);
+          stmt_3.setInt(2,usuario.id_usuario);
           stmt_3.executeUpdate();
         }
         finally
@@ -131,7 +131,7 @@ public class Servicio
     {
       conexion.close();
     }
-    Map<String,int> respuestaAlCliente = new HashMap<>();
+    Map<String,Integer> respuestaAlCliente = new HashMap<>();
     respuestaAlCliente.put("id_usuario",usuario.id_usuario);
     return Response.ok().entity(j.toJson(respuestaAlCliente).build();
   }
@@ -140,7 +140,7 @@ public class Servicio
   @Path("consulta_usuario")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response consulta(@FormParam("id_usuario") int id_usuario) throws Exception
+  public Response consulta(@FormParam("id_usuario") Integer id_usuario) throws Exception
   {
     Connection conexion= pool.getConnection();
 
@@ -308,7 +308,7 @@ public class Servicio
   @Path("borra_usuario")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response borra(@FormParam("id_usuario") int id_usuario) throws Exception{
+  public Response borra(@FormParam("id_usuario") Integer id_usuario) throws Exception{
     Connection conexion= pool.getConnection();
 
     try{

@@ -1,7 +1,9 @@
 //import negocio.Usuario;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 public class Cliente {
+    private static final String IP_VM = "";
     private static void limpiarPantalla(){
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -40,6 +42,30 @@ public class Cliente {
         }
         return retorno;
     }
+    private static Pair<Integer,String> enviaPeticion(Map<String, String>mapaParametros, String metodo, String servicio){
+        URL url = new URL("http://"+IP_VM+":8080/Servicio/rest/ws/"+servicio);
+        HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
+        conexion.setDoOutput(true);
+        conexion.setRequestMethod(metodo);
+        conexion.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+        String parametros = "";
+        if(mapaParametros != null){
+            for (Map.Entry<String, String> entry : mapaParametros.entrySet()) {
+                parametros+= entry.getKey()+"="+URLEncoder.encode(entry.getValue(),"UTF-8")+"&";
+            }
+            if(parametros.charAt(parametros.length()-1) == '&')
+                parametros = parametros.substring(0,parametros.length()-2);
+        }
+        OutputStream os = conexion.getOutputStream();
+        os.write(parametros.getBytes());
+        os.flush();
+        int codigoRespuesta = conexion.getResponseCode();
+        String respuestaTMP, respuesta;
+        while ((respuestaTMP = br.readLine()) != null) respuesta+=respuestaTMP;
+        conexion.disconnect();
+        Pair<Integer,String>par = new Pair<Integer,String>(codigoRespuesta,respuesta);
+        return par;
+    }
     private static Usuario solicitarDatosDeUsuario(Usuario datosAnteriores, Scanner sc){
         Usuario retorno = new Usuario();
         sc.nextLine();
@@ -60,17 +86,56 @@ public class Cliente {
     }
     private static void altaUsuario(Scanner sc){
         System.out.println("Alta de Usuario");
-        Usuario anterior = null;
-        Usuario usuarioARegistrar = solicitarDatosDeUsuario(anterior, sc);
+        Gson j = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
+        Usuario usuarioARegistrar = solicitarDatosDeUsuario(null, sc);
+        Map<String,String>mapaParametros = new Map<String,String>();
+        mapaParametros.put("usuario", j.toJSON(usuarioARegistrar));
+        Pair<Integer,String>respuesta = enviaPeticion(mapaParametros, "POST", "alta_usuario");
+        if(respuesta.getKey() == 200){
+            System.out.println("Usuario registrado!! el id es: "+respuesta.getValue());
+        }else{
+            System.out.println("Error al registrar el usuario "+respuesta.getValue());
+        }
         
     }
     private static void consultaUsuario(Scanner sc){
         System.out.println("Consulta de Usuario");
         int id_usuario = preguntarIdUsuario(sc);
+        Map<String,String>mapaParametros = new Map<String,String>();
+        mapaParametros.put("id_usuario", id_usuario+"");
+        Gson j = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
+        Pair<Integer,String>respuesta = enviaPeticion(mapaParametros, "POST", "consulta_usuario");
+        if(respuesta.getKey() == 200){
+            System.out.println("Usuario encontrado!!");
+            Usuario usuarioAnterior;
+            System.out.print("¿Desea modificar los datos del usuario (s/n)?");
+            char resp = sc.next().charAt(0);
+            if(resp == 'y' || resp == 'Y'){
+                Usuario nuevoUsuario = solicitarDatosDeUsuario(usuarioAnterior, sc);
+                mapaParametros.clear();
+                mapaParametros.put("usuario", j.toJSON(nuevoUsuario));
+                Pair<Integer,String>respuesta2 = enviaPeticion(mapaParametros, "POST", "modifica_usuario");
+                if(respuesta2.getKey() == 200){
+                    System.out.println("El usuario ha sido modificado");
+                }else{
+                    System.out.println("Error al modificar el usuario "+respuesta2.getValue());
+                }
+            }
+        }else{
+            System.out.println("Error al encontrar el usuario "+respuesta.getValue());
+        }
     }
     private static void borraUsuario(Scanner sc){
         System.out.println("Borrar Usuario");
         int id_usuario = preguntarIdUsuario(sc);
+        Map<String,String>mapaParametros = new Map<String,String>();
+        mapaParametros.put("id_usuario", id_usuario+"");
+        Pair<Integer,String>respuesta = enviaPeticion(mapaParametros, "POST", "borra_usuario");
+        if(respuesta.getKey() == 200){
+            System.out.println("Usuario eliminado con exito!!");
+        }else{
+            System.out.println("Error al eliminar el usuario "+respuesta.getValue());
+        }
     }
     public static void main(String[] args) throws Exception{
         Scanner sc = new Scanner(System.in);
