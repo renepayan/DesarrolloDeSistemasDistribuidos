@@ -42,29 +42,51 @@ public class Cliente {
         }
         return retorno;
     }
-    private static Pair<Integer,String> enviaPeticion(Map<String, String>mapaParametros, String metodo, String servicio){
-        URL url = new URL("http://"+IP_VM+":8080/Servicio/rest/ws/"+servicio);
+    private static final String IP_VM = "sisdis.sytes.net";
+    private static final int PUERTO_VM = 8080;
+    private static class Respuesta{
+        private int codigo;
+        private String contenido;
+        public Respuesta(int codigo, String contenido){
+            this.codigo = codigo;
+            this.contenido = contenido;
+        }
+        public String getContenido(){
+            return this.contenido;
+        }
+        public int getCodigo(){
+            return this.codigo;
+        }
+    }
+    private static Respuesta enviaPeticion(Map<String, String>mapaParametros, String metodo, String servicio) throws Exception{
+        URL url = new URL("http://"+IP_VM+":"+PUERTO_VM+"/Servicio/rest/ws/"+servicio);
+        String parametros = "";
+        if(mapaParametros != null){
+            for (Map.Entry<String, String> entry : mapaParametros.entrySet()) {
+                parametros+= URLEncoder.encode(entry.getKey(),"UTF-8")+"="+URLEncoder.encode(entry.getValue(),"UTF-8")+"&";
+            }
+            if(parametros.charAt(parametros.length()-1) == '&')
+                parametros = parametros.substring(0,parametros.length()-1);
+        }
         HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
         conexion.setDoOutput(true);
         conexion.setRequestMethod(metodo);
         conexion.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-        String parametros = "";
-        if(mapaParametros != null){
-            for (Map.Entry<String, String> entry : mapaParametros.entrySet()) {
-                parametros+= entry.getKey()+"="+URLEncoder.encode(entry.getValue(),"UTF-8")+"&";
-            }
-            if(parametros.charAt(parametros.length()-1) == '&')
-                parametros = parametros.substring(0,parametros.length()-2);
-        }
         OutputStream os = conexion.getOutputStream();
         os.write(parametros.getBytes());
         os.flush();
         int codigoRespuesta = conexion.getResponseCode();
-        String respuestaTMP, respuesta;
-        while ((respuestaTMP = br.readLine()) != null) respuesta+=respuestaTMP;
+        String respuestaTMP, contenido="";
+        try{
+            BufferedReader br = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
+            while ((respuestaTMP = br.readLine()) != null) contenido+=respuestaTMP;
+            br.close();
+        }catch(Exception e){
+        
+        }
         conexion.disconnect();
-        Pair<Integer,String>par = new Pair<Integer,String>(codigoRespuesta,respuesta);
-        return par;
+        Respuesta r = new Respuesta(codigoRespuesta, contenido);
+        return r;
     }
     private static Usuario solicitarDatosDeUsuario(Usuario datosAnteriores, Scanner sc){
         Usuario retorno = new Usuario();
