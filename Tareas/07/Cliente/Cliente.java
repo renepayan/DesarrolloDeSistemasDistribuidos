@@ -2,7 +2,6 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.util.regex.Pattern;
-import com.google.gson.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 public class Cliente {
@@ -48,8 +47,8 @@ public class Cliente {
     }
     
     private static class Respuesta{
-        private int codigo;
-        private String contenido;
+        private int codigo = 500;
+        private String contenido = "";
         public Respuesta(int codigo, String contenido){
             this.codigo = codigo;
             this.contenido = contenido;
@@ -63,6 +62,7 @@ public class Cliente {
     }
     private static Respuesta enviaPeticion(Map<String, String>mapaParametros, String metodo, String servicio) throws Exception{
         URL url = new URL("http://"+IP_VM+":"+PUERTO_VM+"/Servicio/rest/ws/"+servicio);
+        System.out.println("http://"+IP_VM+":"+PUERTO_VM+"/Servicio/rest/ws/"+servicio);
         String parametros = "";
         if(mapaParametros != null){
             for (Map.Entry<String, String> entry : mapaParametros.entrySet()) {
@@ -80,12 +80,17 @@ public class Cliente {
         os.flush();
         int codigoRespuesta = conexion.getResponseCode();
         String respuestaTMP, contenido="";
+        BufferedReader br;
         try{
-            BufferedReader br = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
+            if(codigoRespuesta == HttpURLConnection.HTTP_OK){
+                br = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
+            }else{
+                br = new BufferedReader(new InputStreamReader(conexion.getErrorStream()));
+            }
             while ((respuestaTMP = br.readLine()) != null) contenido+=respuestaTMP;
             br.close();
         }catch(Exception e){
-        
+            e.printStackTrace();
         }
         conexion.disconnect();
         Respuesta r = new Respuesta(codigoRespuesta, contenido);
@@ -114,12 +119,17 @@ public class Cliente {
         Gson j = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
         Usuario usuarioARegistrar = solicitarDatosDeUsuario(null, sc);
         Map<String,String>mapaParametros = new HashMap<String,String>();
-        mapaParametros.put("usuario", j.toJSON(mapaParametros));
-        Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "alta_usuario");
+        mapaParametros.put("usuario", j.toJson(usuarioARegistrar));
+        Respuesta respuesta = null;
+        try{
+             respuesta = enviaPeticion(mapaParametros, "POST", "alta_usuario");
+        }catch(Exception e){
+
+        }
         if(respuesta.getCodigo() == 200){
             System.out.println("Usuario registrado!! el id es: "+respuesta.getContenido());
         }else{
-            System.out.println("Error al registrar el usuario "+respuesta.getCodigo());
+            System.out.println("Error al registrar el usuario "+respuesta.getContenido());
         }
         
     }
@@ -129,7 +139,12 @@ public class Cliente {
         Map<String,String>mapaParametros = new HashMap<String,String>();
         mapaParametros.put("id_usuario", id_usuario+"");
         Gson j = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
-        Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "consulta_usuario");
+        Respuesta respuesta = null;
+        try{
+            respuesta = enviaPeticion(mapaParametros, "POST", "consulta_usuario");
+        }catch(Exception e){
+
+        }
         if(respuesta.getCodigo() == 200){
             System.out.println("Usuario encontrado!!");
             Usuario usuarioAnterior = j.fromJson(respuesta.getContenido(), Usuario.class);
@@ -138,8 +153,13 @@ public class Cliente {
             if(resp == 'Y'){
                 Usuario nuevoUsuario = solicitarDatosDeUsuario(usuarioAnterior, sc);
                 mapaParametros.clear();
-                mapaParametros.put("usuario", j.toJSON(nuevoUsuario));
-                Respuesta respuesta2 = enviaPeticion(mapaParametros, "POST", "modifica_usuario");
+                mapaParametros.put("usuario", j.toJson(nuevoUsuario));
+                Respuesta respuesta2 = null;
+                try{
+                    respuesta2 = enviaPeticion(mapaParametros, "POST", "modifica_usuario");
+                }catch(Exception e){
+
+                }
                 if(respuesta2.getCodigo() == 200){
                     System.out.println("El usuario ha sido modificado");
                 }else{
@@ -147,7 +167,7 @@ public class Cliente {
                 }
             }
         }else{
-            System.out.println("Error al encontrar el usuario "+respuesta.getCodigo());
+            System.out.println("Error al encontrar el usuario "+respuesta.getContenido());
         }
     }
     private static void borraUsuario(Scanner sc){
@@ -155,7 +175,12 @@ public class Cliente {
         int id_usuario = preguntarIdUsuario(sc);
         Map<String,String>mapaParametros = new HashMap<String,String>();
         mapaParametros.put("id_usuario", id_usuario+"");
-        Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "borra_usuario");
+        Respuesta respuesta = null;
+        try{
+            respuesta = enviaPeticion(mapaParametros, "POST", "borra_usuario");
+        }catch(Exception e){
+
+        }
         if(respuesta.getCodigo() == 200){
             System.out.println("Usuario eliminado con exito!!");
         }else{

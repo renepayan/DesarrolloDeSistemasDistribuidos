@@ -5,15 +5,15 @@
 //import com.google.gson.*;
 
 public class Usuario{
-  int id_usuario;
-  String email;
-  String nombre;
-  String apellido_paterno;
-  String apellido_materno;
-  String fecha_nacimiento;
-  String telefono;
-  String genero;
-  byte[] foto;
+  public int id_usuario;
+  public String email;
+  public String nombre;
+  public String apellido_paterno;
+  public String apellido_materno;
+  public String fecha_nacimiento;
+  public String telefono;
+  public String genero;
+  public byte[] foto;
 
   // @FormParam necesita un metodo que convierta una String al objeto de tipo Usuario
   /*public static Usuario valueOf(String s) throws Exception

@@ -92,7 +92,7 @@ public class Servicio
         stmt_1.close();
       }
 
-      PreparedStatement stmt_2 = conexion.prepareStatement("INSERT INTO usuario VALUES (0,?,?,?,?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+      PreparedStatement stmt_2 = conexion.prepareStatement("INSERT INTO usuarios VALUES (0,?,?,?,?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
       try{
         stmt_2.setString(1,usuario.email);
         stmt_2.setString(2,usuario.nombre);
@@ -148,7 +148,7 @@ public class Servicio
 
     try
     {
-      PreparedStatement stmt_1 = conexion.prepareStatement("SELECT a.email,a.nombre,a.apellido_paterno,a.apellido_materno,a.fecha_nacimiento,a.telefono,a.genero,a.id_usuario,b.foto FROM usuarios a LEFT OUTER JOIN fotos_usuarios b ON a.id_usuario=b.id_usuario WHERE usuarios.id_usuario=?");
+      PreparedStatement stmt_1 = conexion.prepareStatement("SELECT a.email,a.nombre,a.apellido_paterno,a.apellido_materno,a.fecha_nacimiento,a.telefono,a.genero,a.id_usuario,b.foto FROM usuarios a LEFT OUTER JOIN fotos_usuarios b ON a.id_usuario=b.id_usuario WHERE a.id_usuario=?");
       try
       {
         stmt_1.setInt(1,id_usuario);
