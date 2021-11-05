@@ -23,6 +23,8 @@ import javax.naming.InitialContext;
 
 import java.util.ArrayList;
 import com.google.gson.*;
+import java.util.Map;
+import java.util.HashMap;
 
 // la URL del servicio web es http://localhost:8080/Servicio/rest/ws
 // donde:
@@ -100,7 +102,7 @@ public class Servicio
         stmt_2.setString(6,usuario.telefono);
         stmt_2.setString(7,usuario.genero);
         stmt_2.executeUpdate();
-        ResultSet keyResultSet = stmt.getGeneratedKeys();
+        ResultSet keyResultSet = stmt_2.getGeneratedKeys();
         if (keyResultSet.next()) {
             usuario.id_usuario = (int) keyResultSet.getInt(1);
         }
