@@ -133,7 +133,7 @@ public class Servicio
     }
     Map<String,Integer> respuestaAlCliente = new HashMap<>();
     respuestaAlCliente.put("id_usuario",usuario.id_usuario);
-    return Response.ok().entity(j.toJson(respuestaAlCliente).build();
+    return Response.ok().entity(j.toJson(respuestaAlCliente)).build();
   }
 
   @POST
@@ -149,7 +149,7 @@ public class Servicio
       PreparedStatement stmt_1 = conexion.prepareStatement("SELECT a.email,a.nombre,a.apellido_paterno,a.apellido_materno,a.fecha_nacimiento,a.telefono,a.genero,a.id_usuario,b.foto FROM usuarios a LEFT OUTER JOIN fotos_usuarios b ON a.id_usuario=b.id_usuario WHERE usuarios.id_usuario=?");
       try
       {
-        stmt_1.setInt(1,id_usuario;
+        stmt_1.setInt(1,id_usuario);
 
         ResultSet rs = stmt_1.executeQuery();
         try
