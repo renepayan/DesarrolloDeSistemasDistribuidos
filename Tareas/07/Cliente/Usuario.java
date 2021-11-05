@@ -4,8 +4,7 @@
 
 //import com.google.gson.*;
 
-public class Usuario
-{
+public class Usuario{
   int id_usuario;
   String email;
   String nombre;

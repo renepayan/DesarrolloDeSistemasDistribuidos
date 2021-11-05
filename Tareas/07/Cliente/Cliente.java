@@ -1,8 +1,12 @@
 import java.util.*;   
 import java.net.*;
 import java.io.*;
+import java.util.regex.Pattern;
+import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 public class Cliente {
-    private static final String IP_VM = "";
+    private static final String IP_VM = "192.168.1.71";
     private static final int PUERTO_VM = 8080;
     private static void limpiarPantalla(){
         System.out.print("\033[H\033[2J");
@@ -109,8 +113,8 @@ public class Cliente {
         System.out.println("Alta de Usuario");
         Gson j = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
         Usuario usuarioARegistrar = solicitarDatosDeUsuario(null, sc);
-        Map<String,String>mapaParametros = new Map<String,String>();
-        mapaParametros.put("usuario", j.toJSON(usuarioARegistrar));
+        Map<String,String>mapaParametros = new HashMap<String,String>();
+        mapaParametros.put("usuario", j.toJSON(mapaParametros));
         Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "alta_usuario");
         if(respuesta.getCodigo() == 200){
             System.out.println("Usuario registrado!! el id es: "+respuesta.getContenido());
@@ -122,16 +126,16 @@ public class Cliente {
     private static void consultaUsuario(Scanner sc){
         System.out.println("Consulta de Usuario");
         int id_usuario = preguntarIdUsuario(sc);
-        Map<String,String>mapaParametros = new Map<String,String>();
+        Map<String,String>mapaParametros = new HashMap<String,String>();
         mapaParametros.put("id_usuario", id_usuario+"");
         Gson j = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
         Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "consulta_usuario");
         if(respuesta.getCodigo() == 200){
             System.out.println("Usuario encontrado!!");
-            Usuario usuarioAnterior;
+            Usuario usuarioAnterior = j.fromJson(respuesta.getContenido(), Usuario.class);
             System.out.print("¿Desea modificar los datos del usuario (s/n)?");
-            char resp = sc.next().charAt(0);
-            if(resp == 'y' || resp == 'Y'){
+            char resp = sc.next().toUpperCase().charAt(0);
+            if(resp == 'Y'){
                 Usuario nuevoUsuario = solicitarDatosDeUsuario(usuarioAnterior, sc);
                 mapaParametros.clear();
                 mapaParametros.put("usuario", j.toJSON(nuevoUsuario));
@@ -149,10 +153,10 @@ public class Cliente {
     private static void borraUsuario(Scanner sc){
         System.out.println("Borrar Usuario");
         int id_usuario = preguntarIdUsuario(sc);
-        Map<String,String>mapaParametros = new Map<String,String>();
+        Map<String,String>mapaParametros = new HashMap<String,String>();
         mapaParametros.put("id_usuario", id_usuario+"");
         Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "borra_usuario");
-        if(respuesta.getCodigo()) == 200){
+        if(respuesta.getCodigo() == 200){
             System.out.println("Usuario eliminado con exito!!");
         }else{
             System.out.println("Error al eliminar el usuario "+respuesta.getContenido());
