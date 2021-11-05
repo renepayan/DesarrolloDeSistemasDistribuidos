@@ -1,9 +1,9 @@
-//import negocio.Usuario;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.regex.Pattern;
+import java.util.*;   
+import java.net.*;
+import java.io.*;
 public class Cliente {
     private static final String IP_VM = "";
+    private static final int PUERTO_VM = 8080;
     private static void limpiarPantalla(){
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -42,8 +42,7 @@ public class Cliente {
         }
         return retorno;
     }
-    private static final String IP_VM = "sisdis.sytes.net";
-    private static final int PUERTO_VM = 8080;
+    
     private static class Respuesta{
         private int codigo;
         private String contenido;
@@ -112,11 +111,11 @@ public class Cliente {
         Usuario usuarioARegistrar = solicitarDatosDeUsuario(null, sc);
         Map<String,String>mapaParametros = new Map<String,String>();
         mapaParametros.put("usuario", j.toJSON(usuarioARegistrar));
-        Pair<Integer,String>respuesta = enviaPeticion(mapaParametros, "POST", "alta_usuario");
-        if(respuesta.getKey() == 200){
-            System.out.println("Usuario registrado!! el id es: "+respuesta.getValue());
+        Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "alta_usuario");
+        if(respuesta.getCodigo() == 200){
+            System.out.println("Usuario registrado!! el id es: "+respuesta.getContenido());
         }else{
-            System.out.println("Error al registrar el usuario "+respuesta.getValue());
+            System.out.println("Error al registrar el usuario "+respuesta.getCodigo());
         }
         
     }
@@ -126,8 +125,8 @@ public class Cliente {
         Map<String,String>mapaParametros = new Map<String,String>();
         mapaParametros.put("id_usuario", id_usuario+"");
         Gson j = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
-        Pair<Integer,String>respuesta = enviaPeticion(mapaParametros, "POST", "consulta_usuario");
-        if(respuesta.getKey() == 200){
+        Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "consulta_usuario");
+        if(respuesta.getCodigo() == 200){
             System.out.println("Usuario encontrado!!");
             Usuario usuarioAnterior;
             System.out.print("¿Desea modificar los datos del usuario (s/n)?");
@@ -136,15 +135,15 @@ public class Cliente {
                 Usuario nuevoUsuario = solicitarDatosDeUsuario(usuarioAnterior, sc);
                 mapaParametros.clear();
                 mapaParametros.put("usuario", j.toJSON(nuevoUsuario));
-                Pair<Integer,String>respuesta2 = enviaPeticion(mapaParametros, "POST", "modifica_usuario");
-                if(respuesta2.getKey() == 200){
+                Respuesta respuesta2 = enviaPeticion(mapaParametros, "POST", "modifica_usuario");
+                if(respuesta2.getCodigo() == 200){
                     System.out.println("El usuario ha sido modificado");
                 }else{
-                    System.out.println("Error al modificar el usuario "+respuesta2.getValue());
+                    System.out.println("Error al modificar el usuario "+respuesta2.getCodigo());
                 }
             }
         }else{
-            System.out.println("Error al encontrar el usuario "+respuesta.getValue());
+            System.out.println("Error al encontrar el usuario "+respuesta.getCodigo());
         }
     }
     private static void borraUsuario(Scanner sc){
@@ -152,11 +151,11 @@ public class Cliente {
         int id_usuario = preguntarIdUsuario(sc);
         Map<String,String>mapaParametros = new Map<String,String>();
         mapaParametros.put("id_usuario", id_usuario+"");
-        Pair<Integer,String>respuesta = enviaPeticion(mapaParametros, "POST", "borra_usuario");
-        if(respuesta.getKey() == 200){
+        Respuesta respuesta = enviaPeticion(mapaParametros, "POST", "borra_usuario");
+        if(respuesta.getCodigo()) == 200){
             System.out.println("Usuario eliminado con exito!!");
         }else{
-            System.out.println("Error al eliminar el usuario "+respuesta.getValue());
+            System.out.println("Error al eliminar el usuario "+respuesta.getContenido());
         }
     }
     public static void main(String[] args) throws Exception{
