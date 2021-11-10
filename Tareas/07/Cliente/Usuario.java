@@ -14,6 +14,10 @@ public class Usuario{
   public String telefono;
   public String genero;
   public byte[] foto;
+  @Override
+  public String toString(){
+    return "id: "+this.id_usuario+"\nEmail: "+this.email+"\nNombre: "+this.nombre+"\nApellido paterno: "+this.apellido_paterno+"\nApellido materno: "+this.apellido_materno+"\nFecha de nacimiento: "+this.fecha_nacimiento+"\nTelefono: "+this.telefono+"\nGenero: "+this.genero;
+  }
 
   // @FormParam necesita un metodo que convierta una String al objeto de tipo Usuario
   /*public static Usuario valueOf(String s) throws Exception

@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 public class Cliente {
-    private static final String IP_VM = "192.168.1.71";
+    private static final String IP_VM = "20.115.21.46";
     private static final int PUERTO_VM = 8080;
     private static void limpiarPantalla(){
         System.out.print("\033[H\033[2J");
@@ -38,31 +38,16 @@ public class Cliente {
                         }else{
                             break;
                         }
+                    }else{
+                        break;
                     }
-                    break;
                 }
             }
         }
         return retorno;
     }
-    
-    private static class Respuesta{
-        private int codigo = 500;
-        private String contenido = "";
-        public Respuesta(int codigo, String contenido){
-            this.codigo = codigo;
-            this.contenido = contenido;
-        }
-        public String getContenido(){
-            return this.contenido;
-        }
-        public int getCodigo(){
-            return this.codigo;
-        }
-    }
     private static Respuesta enviaPeticion(Map<String, String>mapaParametros, String metodo, String servicio) throws Exception{
         URL url = new URL("http://"+IP_VM+":"+PUERTO_VM+"/Servicio/rest/ws/"+servicio);
-        System.out.println("http://"+IP_VM+":"+PUERTO_VM+"/Servicio/rest/ws/"+servicio);
         String parametros = "";
         if(mapaParametros != null){
             for (Map.Entry<String, String> entry : mapaParametros.entrySet()) {
@@ -110,8 +95,16 @@ public class Cliente {
         return retorno;        
     }
     private static int preguntarIdUsuario(Scanner sc){
-        System.out.print("Id del usuario: ");
-        int id = sc.nextInt();
+        int id = 0;
+        while(true){
+            System.out.print("Id del usuario: ");
+            id = sc.nextInt();
+            if(id <= 0){
+                System.out.println("Id invalido");
+            }else{
+                break;
+            }
+        }
         return id;
     }
     private static void altaUsuario(Scanner sc){
@@ -148,10 +141,12 @@ public class Cliente {
         if(respuesta.getCodigo() == 200){
             System.out.println("Usuario encontrado!!");
             Usuario usuarioAnterior = j.fromJson(respuesta.getContenido(), Usuario.class);
-            System.out.print("¿Desea modificar los datos del usuario (s/n)?");
+            System.out.println(usuarioAnterior.toString());
+            System.out.print("¿Desea modificar los datos del usuario (s/n)? ");
             char resp = sc.next().toUpperCase().charAt(0);
-            if(resp == 'Y'){
+            if(resp == 'S'){
                 Usuario nuevoUsuario = solicitarDatosDeUsuario(usuarioAnterior, sc);
+                nuevoUsuario.id_usuario = usuarioAnterior.id_usuario;
                 mapaParametros.clear();
                 mapaParametros.put("usuario", j.toJson(nuevoUsuario));
                 Respuesta respuesta2 = null;
@@ -182,7 +177,7 @@ public class Cliente {
 
         }
         if(respuesta.getCodigo() == 200){
-            System.out.println("Usuario eliminado con exito!!");
+            System.out.println("El usuario ha sido borrado");
         }else{
             System.out.println("Error al eliminar el usuario "+respuesta.getContenido());
         }

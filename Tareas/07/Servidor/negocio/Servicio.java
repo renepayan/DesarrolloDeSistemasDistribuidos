@@ -170,7 +170,7 @@ public class Servicio
 	          r.foto = rs.getBytes(9);
             return Response.ok().entity(j.toJson(r)).build();
           }
-          return Response.status(400).entity(j.toJson(new Error("El email no existe"))).build();
+          return Response.status(400).entity(j.toJson(new Error("El id del usuario no existe"))).build();
         }
         finally
         {
@@ -199,6 +199,8 @@ public class Servicio
   public Response modifica(@FormParam("usuario") Usuario usuario) throws Exception
   {
     Connection conexion= pool.getConnection();
+    if (usuario.id_usuario == null)
+      return Response.status(400).entity(j.toJson(new Error("Se debe ingresar el id del usuario"))).build();
 
     if (usuario.email == null || usuario.email.equals(""))
       return Response.status(400).entity(j.toJson(new Error("Se debe ingresar el email"))).build();
@@ -211,7 +213,24 @@ public class Servicio
 
     if (usuario.fecha_nacimiento == null || usuario.fecha_nacimiento.equals(""))
       return Response.status(400).entity(j.toJson(new Error("Se debe ingresar la fecha de nacimiento"))).build();
-
+    
+    PreparedStatement stmt_0 = conexion.prepareStatement("SELECT 1 FROM usuarios WHERE id_usuario = ?");
+    try{
+      stmt_0.setInt(1,usuario.id_usuario.intValue());
+      stmt_0.executeQuery();
+      ResultSet rs = stmt_0.executeQuery();
+      try{
+        if (!rs.next())
+          return Response.status(400).entity(j.toJson(new Error("El id del usuario no existe"))).build();
+      }
+      finally{
+        rs.close();
+      }
+    }catch(Exception e){
+      return Response.status(400).entity(j.toJson(new Error(e.getMessage()))).build();
+    }finally{
+      stmt_0.close();
+    }
     try
     {
       PreparedStatement stmt_1 = conexion.prepareStatement("UPDATE usuarios SET nombre=?,apellido_paterno=?,apellido_materno=?,fecha_nacimiento=?,telefono=?,genero=?,email=? WHERE id_usuario=?");
@@ -224,7 +243,7 @@ public class Servicio
         stmt_1.setString(5,usuario.telefono);
         stmt_1.setString(6,usuario.genero);
         stmt_1.setString(7, usuario.email);
-        stmt_1.setInt(8,usuario.id_usuario);
+        stmt_1.setInt(8,usuario.id_usuario.intValue());
         stmt_1.executeUpdate();
       }
       finally
