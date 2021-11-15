@@ -7,6 +7,7 @@
  */
 
 package carritoDeCompras;
+import com.google.gson.*;
 public class Foto {
     private int idFoto;
     private byte[] imagen;
@@ -37,5 +38,9 @@ public class Foto {
     }
     public void setTipo(String tipo){
         this.tipo = tipo;
+    }
+    public static Foto valueOf(String s) throws Exception{
+        Gson j = new GsonBuilder().registerTypeAdapter(byte[].class,new AdaptadorGsonBase64()).create();
+        return (Foto)j.fromJson(s,Foto.class);
     }
 }

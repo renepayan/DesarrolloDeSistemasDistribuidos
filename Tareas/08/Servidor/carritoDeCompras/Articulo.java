@@ -5,15 +5,16 @@
  *     Foto INT NOT NULL, 
  *     Precio Double NOT NULL,
  *     Inventario INT NOT NULL,
- *     FOREIGN KEY (Foto) REFERENCES carrito_foto(idFoto)
+ *     FOREIGN KEY (Foto) REFERENCES fotos(idFoto)
  * );
  */
 
 package carritoDeCompras;
+import com.google.gson.*;
 public class Articulo {
-    private id idArticulo;
+    private int idArticulo;
     private String descripcion;
-    private Dobule precio;
+    private Double precio;
     private Long inventario;
     private Foto foto;
     public Articulo(int idArticulo, String descripcion, Double precio, Long inventario, Foto foto){
@@ -26,7 +27,7 @@ public class Articulo {
     public int getIdArticulo(){
         return this.idArticulo;
     }
-    public int setIdArticulo(int idArticulo){
+    public void setIdArticulo(int idArticulo){
         this.idArticulo = idArticulo;
     }
 
@@ -44,17 +45,21 @@ public class Articulo {
         this.precio = precio;
     }
 
-    public void getInventario(){
+    public Long getInventario(){
         return this.inventario;
     }
-    public Long setInventario(Long inventario){
+    public void setInventario(Long inventario){
         this.inventario = inventario;
     }
 
-    public void getFoto(){
+    public Foto getFoto(){
         return this.foto;
     }
-    public Foto setFoto(Foto foto){
+    public void setFoto(Foto foto){
         this.foto = foto;
+    }
+    public static Articulo valueOf(String s) throws Exception{
+        Gson j = new GsonBuilder().registerTypeAdapter(byte[].class,new AdaptadorGsonBase64()).create();
+        return (Articulo)j.fromJson(s,Articulo.class);
     }
 }

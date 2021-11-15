@@ -3,6 +3,7 @@ package carritoDeCompras;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.*;  
 
 public class FotoDatos {
     public static void insertarFoto(Foto foto, Connection conexion) throws Exception{
@@ -12,7 +13,7 @@ public class FotoDatos {
         pstmInsert.executeUpdate();
         ResultSet rsId = pstmInsert.getGeneratedKeys();
         if (rsId.next()) {
-            foto.setId((int) keyResultSet.getInt(1));
+            foto.setIdFoto((int) rsId.getInt(1));
         }
         rsId.close();
         pstmInsert.close();

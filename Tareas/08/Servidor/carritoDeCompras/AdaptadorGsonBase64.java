@@ -5,7 +5,7 @@
   Carlos Pineda Guerrero, Octubre 2021
 */
 
-package negocio;
+package carritoDeCompras;
 
 import java.lang.reflect.Type;
 import java.util.Base64;
