@@ -110,7 +110,7 @@ public class Servicio {
                 codigoError = 404;
                 throw new Exception("Articulo no encontrado");
             }else{
-                if(articuloComprado.getInventario().intValue() > cantidad.intValue()){
+                if(articuloComprado.getInventario().intValue() >= cantidad.intValue()){
                     conexion.setAutoCommit(false);
                     Compra nuevaCompra = new Compra(0, cantidad, articuloComprado);
                     CompraDatos.insertarCompra(nuevaCompra, conexion);                

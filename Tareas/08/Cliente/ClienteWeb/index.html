@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="spinner.css">
+    <style>
+        table, th, td {
+          border:1px solid black;
+        }
+    </style>
+    <title>Carrito de compras</title>
+</head>
+<body>
+    <div id="spinner">
+        <img src="ajax-loader.gif"/>
+    </div>
+    <div id="app">
+        <div id="registrarArticulo" v-if="seccionDisponible == 2">
+            <h1>Registrar un producto</h1>
+            <div id="formularioRegistro">
+                Descripcion:<br>
+                <textarea width="300" height="300" v-model="nuevoArticulo.descripcion"></textarea><br>
+                Inventario:<input type="number" min="0" step="1" v-model="nuevoArticulo.inventario"/><br>
+                Precio:<input type="number" min="0.00" step="0.01" v-model="nuevoArticulo.precio"/><br>
+                Foto: <input type="file" id="input_foto" onChange="ponerFoto(null)"/><br>
+                <img id="blah" src="#" alt="imagen" height="240" width="120"/><br>
+                <button v-on:click="registrarArticulo()">Registrar</button>
+            </div>
+            <button v-on:click="irA(2)">Ver carrito</button> <button v-on:click="irA(1)">Ver lista de articulos</button>
+        </div>
+        <div id="verCarrito" v-if="seccionDisponible == 3">
+            <h1>Carrito</h1>
+            <table style="width:100%;">
+                <tr>
+                  <th>Imagen</th>
+                  <th>Descripcion</th>
+                  <th>Precio</th>
+                  <th>Unidades</th>
+                  <th>Subtotal</th>
+                </tr>
+                <tr v-for="compra in compras">
+                  <td><center><img v-bind:src="'data:'+compra.articulo.foto.tipo+';base64,'+compra.articulo.foto.imagen" width="120" height="240"/><br></center></td>
+                  <td>{{compra.articulo.descripcion}}</td>
+                  <td>{{compra.articulo.precio}}</td>
+                  <td>{{compra.cantidad}}</td>
+                  <td>{{compra.articulo.precio*compra.cantidad}}</td>
+                </tr>
+                <tr>
+                  <th colspan="4">Total</th>
+                  <th>{{totalCompras}}</th>
+                </tr>
+              </table>
+            <button v-on:click="irA(2)">Registrar un articulo</button> <button v-on:click="irA(1)">Ver lista de articulos</button>            
+        </div>
+        <div id="verArticulos" v-if="seccionDisponible == 1">
+            <h1>Lista de articulos</h1>
+            <div id="campoBusqueda">
+                <input type="text" id="text" v-model="textoABuscar"><button v-on:click="cargarArticulos()">Buscar</button>
+            </div>
+            <div id="resultados" v-if="articulos.length > 0">
+                <div v-for="articulo in articulos" style="border:1px solid black;height: 500px; width: 200px;">
+                    <center><img v-bind:src="'data:'+articulo.foto.tipo+';base64,'+articulo.foto.imagen" width="120" height="240"/><br></center>
+                    {{articulo.descripcion}}<br>
+                    <b>Precio:</b>${{articulo.precio}}MXN<br>
+                    <center><h2>Comprar:</h2></center>                    
+                    Unidades:<input type="number" min="1" :max="articulo.inventario" step="1" width="60" v-model="cantidadAComprar"/><br>
+                    <button v-on:click="comprar(articulo.idArticulo)">Comprar</button>
+                </div>
+            </div>
+            <button v-on:click="irA(2)">Registrar un articulo</button> <button v-on:click="irA(3)">Ver carrito</button>
+        </div>
+      </div>
+      <script>
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+            function ponerFoto(foto){
+                if(foto === null){
+                    const [file] = document.getElementById("input_foto").files
+                    if (file) {
+                        document.getElementById("blah").src = URL.createObjectURL(file)
+                    }
+                }else{
+                    document.getElementById("blah").src = URL.createObjectURL(foto)
+                }
+            }
+          var app = new Vue({
+            el: '#app',    
+            data: {
+                totalCompras:0,
+                nuevoArticulo:{
+                    descripcion:"",
+                    inventario:0,
+                    precio:0.0,
+                    idArticulo:0,
+                    foto:{
+                        idFoto:0,
+                        tipo:"",
+                        imagen:""
+                    }
+                },
+                seccionDisponible: 1,
+                cantidadAComprar: 0,
+                articulos:[],
+                compras:[],
+                textoABuscar:"",
+                base:"http://192.168.1.71:8080/CarritoDeCompras/rest/ws/"
+            },
+            methods:{
+                registrarArticulo:async function(){
+                    app.mostrarSpinner();
+                    let foto = await toBase64(document.getElementById("input_foto").files[0]);
+                    app._data.nuevoArticulo.foto.imagen = foto.split(',')[1]
+                    app._data.nuevoArticulo.foto.tipo = "image/"+((foto.split(',')[0]).split('/')[1]).split(';')[0];
+                    const params = new URLSearchParams();
+                    let url = app._data.base+"registrar_articulo";
+                    params.append("articulo",JSON.stringify(app._data.nuevoArticulo));
+                    axios.post(url,params)
+                        .then(response=>{
+                            if(response.status == 200){
+                                alert("Registro exitoso");
+                            }else{
+                                console.log(response);
+                            }
+                        })
+                        .catch(error=>{
+                            alert("error al registrar el articulo"+error.response.data);
+                        })
+                        .finally(()=>{
+                            app.quitarSpinner();
+                        });
+                },
+                cargarCompras: function(){
+                    app._data.totalCompras = 0;
+                    app.mostrarSpinner();
+                    let url = app._data.base+"ver_carrito";
+                    axios.get(url)
+                        .then(response=>{
+                            if(response.status == 200){
+                                app._data.compras = response.data.compras;
+                                for(let i = 0; i < response.data.compras.length; i++){
+                                    app._data.totalCompras += response.data.compras[i].cantidad * response.data.compras[i].articulo.precio;
+                                }
+                            }
+                        })
+                        .catch(error=>{
+                            alert("error al cargar el carrito"+error.response.data);
+                        })
+                        .finally(()=>{
+                            app.quitarSpinner();
+                        });
+                },
+                irA: function(donde){
+                    if(donde == 3){
+                        app.cargarCompras();
+                    }
+                    app._data.seccionDisponible = donde;
+                },
+                mostrarSpinner: function(){
+                    document.getElementById("spinner").classList.add("show");
+                },
+                quitarSpinner: function(){
+                    document.getElementById("spinner").classList.remove("show");
+                },
+                comprar: function(idArticulo){                    
+                    app.mostrarSpinner();
+                    let url = app._data.base+"comprar_articulo"
+                    const params = new URLSearchParams();
+                    params.append("idArticulo",idArticulo);
+                    params.append("cantidad", app._data.cantidadAComprar)                    
+                    axios.post(url,params)
+                        .then(response=>{
+                            if(response.status == 200){
+                                alert("compra exitosa");
+                            }
+                        })
+                        .catch(error=>{
+                            alert("error al comprar el articulo: "+error.response.data.detailMessage);                            
+                        }).finally(()=>{
+                            app.quitarSpinner();
+                        });
+                    app._data.cantidadAComprar = 0;
+                },
+                cargarArticulos: function(){
+                    app._data.articulos = []
+                    let url = app._data.base+"buscar_articulos"
+                    const params = new URLSearchParams();
+                    params.append("texto",app._data.textoABuscar);
+
+                    app.mostrarSpinner();
+                    axios.post(url,params)
+                        .then(response=>{
+                            if(response.status == 200){
+                                app._data.articulos = response.data.articulos
+                            }
+                        })
+                        .catch(error=>{
+                            alert("error al consultar los articulos"+error.response.data);
+                        }).finally(()=>{
+                            app.quitarSpinner();
+                        });
+                }
+            }
+        })
+      </script>
+</body>
